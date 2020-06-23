@@ -232,9 +232,10 @@ export default class Volumes extends Vue {
   displayResults: any[] = []
   searchResults: any[] = []
 
+  // baseUrl: any = process.env.BASE_URL
+
   async asyncData(context: any) {
-    const url = context.route.path.replace('/en/', '/')
-    const uri = url.replace('/search', '/index.json')
+    const uri = process.env.BASE_URL + '/index.json'
     const apiResult = await context.$axios
       .get(uri)
       .then((response: any) => {

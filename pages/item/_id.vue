@@ -296,9 +296,9 @@ export default class Search extends Vue {
   title: string = ''
 
   async asyncData(context: any) {
-    const url = context.route.path.replace('/en/', '/')
-    const uri = url.replace('/item/', '/data/') + '.json'
     const itemId = `${context.params.id}`
+    const url = process.env.BASE_URL + '/item/' + itemId
+    const uri = process.env.BASE_URL + '/data/' + itemId + '.json'
     const apiResult = await context.$axios
       .get(uri)
       .then((response: any) => {
