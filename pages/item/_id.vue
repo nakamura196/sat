@@ -238,7 +238,7 @@
         class="grey lighten-3 py-5 px-3 py-3 text-center"
         style="background-color: #f9f6f0;"
       >
-        <v-btn depressed icon :href="'../' + uri" target="_blank">
+        <v-btn depressed icon :href="uri" target="_blank">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <img
@@ -311,8 +311,10 @@ export default class Search extends Vue {
 
     return {
       apiResult,
-      uri: url,
-      url: location.href,
+      uri:
+        location.href.replace('/item/', '/data/').replace('/en/', '/') +
+        '.json',
+      url: location.href.replace('/en/', '/'),
       title: itemId,
     }
   }
