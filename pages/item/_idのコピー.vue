@@ -54,7 +54,7 @@
       </table>
 
       <v-row class="text-center">
-        <v-col sm="12">
+        <v-col sm="6">
           <table
             border="1"
             style="border-collapse: collapse;"
@@ -65,86 +65,32 @@
               <th colspan="4">
                 <h2>{{ '勘同目録' }}</h2>
               </th>
-              <th bgcolor="#CFD8DC" rowspan="60" width="2%"></th>
-              <th colspan="4">
-                <h2>{{ '脚注' }}</h2>
-              </th>
             </tr>
             <tr>
-              <th width="10%">{{ '底本/校本' }}</th>
-              <th width="10%">{{ '❹' }}</th>
-              <th width="12%">{{ '❼' }}</th>
-              <th width="12%">{{ '❼備考' }}</th>
-              <th width="10%">{{ '底本/校本' }}</th>
-              <th width="10%">{{ '新添部分' }}</th>
-              <th width="12%">{{ 'テキスト' }}</th>
-              <th width="12%">{{ '備考' }}</th>
+              <th width="30%">{{ '底本/校本' }}</th>
+              <th width="20%">{{ '❹' }}</th>
+              <th width="25%">{{ '❼' }}</th>
+              <th width="25%">{{ '❼備考' }}</th>
             </tr>
             <tr class="text-center">
               <td>{{ apiResult['ex:勘同目録'][0]['ex:底本/校本'] }}</td>
               <td>{{ apiResult['ex:勘同目録'][0]['ex:❹'] }}</td>
               <td>{{ apiResult['ex:勘同目録'][0]['ex:❼'] }}</td>
               <td>{{ apiResult['ex:勘同目録'][0]['ex:❼備考'] }}</td>
-              <td>{{ apiResult['ex:脚注'][0]['ex:底本/校本'] }}</td>
-              <td>{{ apiResult['ex:脚注'][0]['ex:新添'] }}</td>
-              <td>
-                <template v-if="!true">
-                  <a href="#">{{ apiResult['ex:脚注'][0]['ex:テキスト'] }}</a>
-                </template>
-                <template v-else>
-                  {{ apiResult['ex:脚注'][0]['ex:テキスト'] }}
-                </template>
-              </td>
-              <td>{{ apiResult['ex:脚注'][0]['ex:備考'] }}</td>
             </tr>
             <tr>
               <th colspan="4">
-                <h3>{{ '勘同目録詳細情報' }}</h3>
-              </th>
-              <th colspan="4">
-                <h3>{{ '脚注詳細情報' }}</h3>
+                <h3>{{ '勘同目録詳細' }}</h3>
               </th>
             </tr>
             <template v-for="n of 5">
               <template v-if="n == 1">
-                <!-- 
                 <tr v-for="n2 of 3" :key="'l1_' + n + n2">
                   <td v-if="n2 == 1" :rowspan="kFields.length + 3">
                     {{ 'テキスト' + n }}<br />{{ '（勘同目録）' }}
                   </td>
                   <td>-</td>
                   <td colspan="2">-</td>
-                </tr>
-                -->
-                <tr :key="'r1_' + n">
-                  <td :rowspan="kFields.length + 3">
-                    {{ 'テキスト' + n }}<br />{{ '（勘同目録）' }}
-                  </td>
-                  <td bgcolor="#B0BEC5"></td>
-                  <td bgcolor="#B0BEC5" colspan="2"></td>
-                  <td :rowspan="kFields.length + 3">
-                    {{ 'テキスト' + n }}<br />{{ '（脚注）' }}
-                  </td>
-                  <td>テキスト推定</td>
-                  <td colspan="2">
-                    {{ apiResult['ex:脚注'][0]['ex:底本推定'] }}
-                  </td>
-                </tr>
-                <tr :key="'r10_' + n">
-                  <td bgcolor="#B0BEC5"></td>
-                  <td bgcolor="#B0BEC5" colspan="2"></td>
-                  <td>略号使用</td>
-                  <td colspan="2">
-                    {{ apiResult['ex:脚注'][0]['ex:略号の使用'] }}
-                  </td>
-                </tr>
-                <tr :key="'r11_' + n">
-                  <td bgcolor="#B0BEC5"></td>
-                  <td bgcolor="#B0BEC5" colspan="2"></td>
-                  <td>略号解説</td>
-                  <td colspan="2">
-                    {{ apiResult['ex:脚注'][0]['ex:略号解説'] }}
-                  </td>
                 </tr>
               </template>
               <tr
@@ -175,28 +121,6 @@
                       : ''
                   }}
                 </td>
-
-                <td
-                  v-if="index == 0 && n != 1"
-                  :rowspan="kFields.length"
-                  :bgcolor="n < 4 ? '' : '#B0BEC5'"
-                >
-                  <template v-if="n < 4">
-                    {{ 'テキスト' + n }}<br />{{ '（脚注）' }}
-                  </template>
-                </td>
-                <td :bgcolor="n < 4 ? '' : '#B0BEC5'">
-                  {{ n > 3 ? '' : field }}
-                </td>
-                <td colspan="2" :bgcolor="n < 4 ? '' : '#B0BEC5'">
-                  {{
-                    apiResult['ex:脚注'][0]['ex:texts'][n - 1]
-                      ? apiResult['ex:脚注'][0]['ex:texts'][n - 1][
-                          'ex:' + field
-                        ]
-                      : ''
-                  }}
-                </td>
               </tr>
             </template>
 
@@ -219,7 +143,92 @@
                       : ''
                   }}
                 </td>
+              </tr>
+            </template>
+          </table>
+        </v-col>
+        <v-col sm="6">
+          <table
+            border="1"
+            style="border-collapse: collapse;"
+            width="100%"
+            class="my-2"
+          >
+            <tr>
+              <th colspan="4">
+                <h2>{{ '脚注' }}</h2>
+              </th>
+            </tr>
+            <tr>
+              <th width="30%">{{ '底本/校本' }}</th>
+              <th width="20%">{{ '新添部分' }}</th>
+              <th width="25%">{{ 'テキスト' }}</th>
+              <th width="25%">{{ '備考' }}</th>
+            </tr>
+            <tr class="text-center">
+              <td>{{ apiResult['ex:脚注'][0]['ex:底本/校本'] }}</td>
+              <td>{{ apiResult['ex:脚注'][0]['ex:新添'] }}</td>
+              <td>
+                <a href="">{{ apiResult['ex:脚注'][0]['ex:テキスト'] }}</a>
+              </td>
+              <td>{{ apiResult['ex:脚注'][0]['ex:備考'] }}</td>
+            </tr>
+            <tr>
+              <th colspan="4">
+                <h3>{{ '脚注詳細情報' }}</h3>
+              </th>
+            </tr>
+            <template v-for="n of 5">
+              <template v-if="n == 1">
+                <tr :key="'r1_' + n">
+                  <td :rowspan="kFields.length + 3">
+                    {{ 'テキスト' + n }}<br />{{ '（脚注）' }}
+                  </td>
+                  <td>テキスト推定</td>
+                  <td colspan="2">
+                    {{ apiResult['ex:脚注'][0]['ex:底本推定'] }}
+                  </td>
+                </tr>
+                <tr :key="'r10_' + n">
+                  <td>略号使用</td>
+                  <td colspan="2">
+                    {{ apiResult['ex:脚注'][0]['ex:略号の使用'] }}
+                  </td>
+                </tr>
+                <tr :key="'r11_' + n">
+                  <td>略号解説</td>
+                  <td colspan="2">
+                    {{ apiResult['ex:脚注'][0]['ex:略号解説'] }}
+                  </td>
+                </tr>
+              </template>
+              <tr
+                v-for="(field, index) in kFields"
+                :key="'r2_' + n + index"
+                class="text-center"
+              >
+                <td v-if="index == 0 && n != 1" :rowspan="kFields.length">
+                  {{ 'テキスト' + n }}<br />{{ '（脚注）' }}
+                </td>
+                <td>{{ field }}</td>
+                <td colspan="2">
+                  {{
+                    apiResult['ex:脚注'][0]['ex:texts'][n - 1]
+                      ? apiResult['ex:脚注'][0]['ex:texts'][n - 1][
+                          'ex:' + field
+                        ]
+                      : ''
+                  }}
+                </td>
+              </tr>
+            </template>
 
+            <template v-for="n of 2">
+              <tr
+                v-for="(field, index) in hFields"
+                :key="'r3_' + n + index"
+                class="text-center"
+              >
                 <td v-if="index == 0" :rowspan="hFields.length">
                   {{ '所蔵者' + n }}<br />{{ '（脚注）' }}
                 </td>

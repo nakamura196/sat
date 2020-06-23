@@ -67,7 +67,7 @@
         >
           <td width="5%">{{ obj['基-経典番号'] }}</td>
           <td width="2%">{{ obj['基-枝番'] }}</td>
-          <td width="10%">
+          <td width="10%" class="pl-1 text-left">
             <a
               :href="
                 'https://21dzk.l.u-tokyo.ac.jp/SAT2018/' +
@@ -79,7 +79,7 @@
             >
           </td>
           <td width="2%">{{ obj['基-収録巻次'] }}</td>
-          <td width="5%">{{ obj['基-部門'] }}</td>
+          <td width="5%" class="pl-1 text-left">{{ obj['基-部門'] }}</td>
           <td width="2%">{{ obj['基-配本'] }}</td>
           <td width="5%">{{ obj['基-年月日'].join(', ') }}</td>
           <td
@@ -94,9 +94,9 @@
           >
             {{ obj['勘-底本/校本'] }}
           </td>
-          <td width="10%">{{ obj['勘-❹'] }}</td>
-          <td width="10%">{{ obj['勘-❼'] }}</td>
-          <td width="10%">{{ obj['勘-❼備考'] }}</td>
+          <td width="10%" class="pl-1 text-left">{{ obj['勘-❹'] }}</td>
+          <td width="10%" class="pl-1 text-left">{{ obj['勘-❼'] }}</td>
+          <td width="10%" class="pl-1 text-left">{{ obj['勘-❼備考'] }}</td>
 
           <td
             width="5%"
@@ -110,9 +110,9 @@
           >
             {{ obj['脚-底本/校本'] }}
           </td>
-          <td width="5%">{{ obj['脚-新添部分'] }}</td>
-          <td width="10%">{{ obj['脚-テキスト'] }}</td>
-          <td width="10%">{{ obj['脚-備考'] }}</td>
+          <td width="5%" class="pl-1 text-left">{{ obj['脚-新添部分'] }}</td>
+          <td width="10%" class="pl-1 text-left">{{ obj['脚-テキスト'] }}</td>
+          <td width="10%" class="pl-1 text-left">{{ obj['脚-備考'] }}</td>
 
           <td width="5%">
             <nuxt-link
