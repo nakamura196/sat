@@ -29,7 +29,7 @@
             {{ apiResult['ex:基本情報'][0]['ex:経典'][0]['ex:経典番号'] }}
           </td>
           <td>{{ apiResult['ex:基本情報'][0]['ex:経典'][0]['ex:枝番'] }}</td>
-          <td>
+          <td class="pl-1 text-left">
             <a :href="apiResult['ex:sat'][0]['ex:url']" target="_blank">{{
               apiResult['ex:基本情報'][0]['ex:経典'][0]['ex:経典名']
             }}</a>
@@ -37,7 +37,7 @@
           <td>
             {{ apiResult['ex:基本情報'][0]['ex:経典'][0]['ex:収録巻次'] }}
           </td>
-          <td>
+          <td class="pl-1 text-left">
             {{ apiResult['ex:基本情報'][0]['ex:経典'][0]['ex:部門'] }}
           </td>
           <td>
@@ -82,12 +82,20 @@
             </tr>
             <tr class="text-center">
               <td>{{ apiResult['ex:勘同目録'][0]['ex:底本/校本'] }}</td>
-              <td>{{ apiResult['ex:勘同目録'][0]['ex:❹'] }}</td>
-              <td>{{ apiResult['ex:勘同目録'][0]['ex:❼'] }}</td>
-              <td>{{ apiResult['ex:勘同目録'][0]['ex:❼備考'] }}</td>
+              <td class="pl-1 text-left">
+                {{ apiResult['ex:勘同目録'][0]['ex:❹'] }}
+              </td>
+              <td class="pl-1 text-left">
+                {{ apiResult['ex:勘同目録'][0]['ex:❼'] }}
+              </td>
+              <td class="pl-1 text-left">
+                {{ apiResult['ex:勘同目録'][0]['ex:❼備考'] }}
+              </td>
               <td>{{ apiResult['ex:脚注'][0]['ex:底本/校本'] }}</td>
-              <td>{{ apiResult['ex:脚注'][0]['ex:新添'] }}</td>
-              <td>
+              <td class="pl-1 text-left">
+                {{ apiResult['ex:脚注'][0]['ex:新添'] }}
+              </td>
+              <td class="pl-1 text-left">
                 <template v-if="!true">
                   <a href="#">{{ apiResult['ex:脚注'][0]['ex:テキスト'] }}</a>
                 </template>
@@ -95,7 +103,9 @@
                   {{ apiResult['ex:脚注'][0]['ex:テキスト'] }}
                 </template>
               </td>
-              <td>{{ apiResult['ex:脚注'][0]['ex:備考'] }}</td>
+              <td class="pl-1 text-left">
+                {{ apiResult['ex:脚注'][0]['ex:備考'] }}
+              </td>
             </tr>
             <tr>
               <th colspan="4">
