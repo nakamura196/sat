@@ -24,6 +24,7 @@ def read_excel(path):
     print(map)
 
     data = []
+    search = []
 
     uri_context = "https://webpark5032.sakura.ne.jp/tmp/sat/context.json"
 
@@ -274,6 +275,46 @@ def read_excel(path):
             json.dump(obj, f, ensure_ascii=False, indent=4,
             sort_keys=True, separators=(',', ': '))
 
+        # ------------
+
+        qdata = {
+            "No." : df.iloc[j, 0],
+            "基-経典番号" : df.iloc[j, 1],
+            "基-枝番" : df.iloc[j, 2],
+            "基-経典名" : df.iloc[j, 3],
+            "基-収録巻次" : df.iloc[j, 4],
+            "基-部門" : df.iloc[j, 5],
+            "基-配本" : df.iloc[j, 6],
+            "基-年月日" : keiten["ex:出版年月日"],
+            "sat_id" : df.iloc[j, 8]+枝番+"_."+str(df.iloc[j, 10]).zfill(2)+"."+str(df.iloc[j, 11]).zfill(4)+df.iloc[j, 12]+str(df.iloc[j, 13]).zfill(2)
+        }
+
+        if not pd.isnull(df.iloc[j, 14]):
+            qdata["勘-底本/校本"] = df.iloc[j, 14]
+
+        if not pd.isnull(df.iloc[j, 15]):
+            qdata["勘-❹"] = df.iloc[j, 15]
+
+        if not pd.isnull(df.iloc[j, 16]):
+            qdata["勘-❼"] = df.iloc[j, 16]
+
+        if not pd.isnull(df.iloc[j, 17]):
+            qdata["勘-備考❼"] = df.iloc[j, 17]
+
+        if not pd.isnull(df.iloc[j, 18]):
+            qdata["脚-底本/校本"] = df.iloc[j, 18]
+
+        if not pd.isnull(df.iloc[j, 19]):
+            qdata["脚-新添部分"] = df.iloc[j, 19]
+
+        if not pd.isnull(df.iloc[j, 20]):
+            qdata["脚-テキスト"] = df.iloc[j, 20]
+
+        if not pd.isnull(df.iloc[j, 21]):
+            qdata["脚-備考"] = df.iloc[j, 21]
+
+        search.append(qdata)
+
         '''
         if len(data) > 20:
             break
@@ -295,6 +336,10 @@ def read_excel(path):
 
     with open("../static/data.json", 'w') as f:
         json.dump(data, f, ensure_ascii=False, indent=4,
+        sort_keys=True, separators=(',', ': '))
+
+    with open("../static/index.json", 'w') as f:
+        json.dump(search, f, ensure_ascii=False, indent=4,
         sort_keys=True, separators=(',', ': '))
 
     # return data

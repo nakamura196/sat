@@ -296,10 +296,11 @@ export default class Search extends Vue {
   title: string = ''
 
   async asyncData(context: any) {
+    const url = context.route.path.replace('/en/', '/')
+    const uri = url.replace('/item/', '/data/') + '.json'
     const itemId = `${context.params.id}`
-    const url = 'data/' + itemId + '.json'
     const apiResult = await context.$axios
-      .get(url)
+      .get(uri)
       .then((response: any) => {
         const apiResult = response.data
         return apiResult
@@ -311,10 +312,8 @@ export default class Search extends Vue {
 
     return {
       apiResult,
-      uri:
-        location.href.replace('/item/', '/data/').replace('/en/', '/') +
-        '.json',
-      url: location.href.replace('/en/', '/'),
+      uri,
+      url,
       title: itemId,
     }
   }

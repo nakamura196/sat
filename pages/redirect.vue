@@ -10,7 +10,7 @@ export default {
     if (param === undefined) {
       return redirect('/')
     }
-    const redirectPath = '/' + param.replace(base, '')
+    const redirectPath = '/sat/' + param.replace(base, '')
     return redirect(redirectPath)
   },
 }

@@ -5,7 +5,127 @@
         {{ $t('search_result') }}
       </h2>
 
+      <h3 class="my-5">{{ total.toLocaleString() }}{{ $t('hits') }}</h3>
+
+      <div class="text-center mb-5">
+        <v-pagination
+          v-model="currentPage"
+          :length="paginationLength"
+          :total-visible="7"
+          @input="setCurrentPage"
+        ></v-pagination>
+      </div>
+
+      <table
+        border="1"
+        style="border-collapse: collapse;"
+        width="100%"
+        class="my-2"
+      >
+        <tr>
+          <th colspan="7">
+            {{ '基本情報' }}
+          </th>
+          <th colspan="4">
+            {{ '勘同目録' }}
+          </th>
+          <th colspan="4">
+            {{ '脚注' }}
+          </th>
+          <th rowspan="2">詳細情報</th>
+        </tr>
+        <tr>
+          <th>{{ '経典番号' }}</th>
+          <th>{{ '枝番' }}</th>
+          <th>{{ '経典名' }}</th>
+          <th>{{ '収録巻次' }}</th>
+          <th>{{ '部門' }}</th>
+          <th>{{ '配本' }}</th>
+          <th>{{ '出版年月日' }}</th>
+
+          <th>{{ '底本/校本' }}</th>
+          <th>{{ '❹' }}</th>
+          <th>{{ '❼' }}</th>
+          <th>{{ '❼備考' }}</th>
+
+          <th>{{ '底本/校本' }}</th>
+          <th>{{ '新添部分' }}</th>
+          <th>{{ 'テキスト' }}</th>
+          <th>{{ '備考' }}</th>
+        </tr>
+        <tr
+          v-for="(obj, index) in displayResults"
+          :key="index"
+          class="text-center"
+        >
+          <td width="5%">{{ obj['基-経典番号'] }}</td>
+          <td width="2%">{{ obj['基-枝番'] }}</td>
+          <td width="10%">
+            <a
+              :href="
+                'https://21dzk.l.u-tokyo.ac.jp/SAT2018/' +
+                obj['sat_id'] +
+                '.html'
+              "
+              target="_blank"
+              >{{ obj['基-経典名'] }}</a
+            >
+          </td>
+          <td width="2%">{{ obj['基-収録巻次'] }}</td>
+          <td width="5%">{{ obj['基-部門'] }}</td>
+          <td width="2%">{{ obj['基-配本'] }}</td>
+          <td width="5%">{{ obj['基-年月日'].join(', ') }}</td>
+          <td
+            width="5%"
+            :bgcolor="
+              obj['勘-底本/校本'] == '底本'
+                ? '#BBDEFB'
+                : obj['勘-底本/校本'] == '校本'
+                ? '#FFCDD2'
+                : ''
+            "
+          >
+            {{ obj['勘-底本/校本'] }}
+          </td>
+          <td width="10%">{{ obj['勘-❹'] }}</td>
+          <td width="10%">{{ obj['勘-❼'] }}</td>
+          <td width="10%">{{ obj['勘-❼備考'] }}</td>
+
+          <td
+            width="5%"
+            :bgcolor="
+              obj['脚-底本/校本'] == '底本'
+                ? '#BBDEFB'
+                : obj['脚-底本/校本'] == '校本'
+                ? '#FFCDD2'
+                : ''
+            "
+          >
+            {{ obj['脚-底本/校本'] }}
+          </td>
+          <td width="5%">{{ obj['脚-新添部分'] }}</td>
+          <td width="10%">{{ obj['脚-テキスト'] }}</td>
+          <td width="10%">{{ obj['脚-備考'] }}</td>
+
+          <td width="5%">
+            <nuxt-link
+              target="_blank"
+              :to="
+                localePath({
+                  name: 'item-id',
+                  params: {
+                    id: ('00000' + obj['No.']).slice(-5),
+                  },
+                })
+              "
+              >{{ 'more' }}
+            </nuxt-link>
+          </td>
+        </tr>
+      </table>
+
       <v-data-table
+        v-if="false"
         :headers="headers"
         :items="desserts"
         :items-per-page="5"
@@ -61,7 +181,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component /*, Watch */ } from 'nuxt-property-decorator'
+import { Vue, Watch, Component /*, Watch */ } from 'nuxt-property-decorator'
 // import axios from 'axios'
 
 // import searchResult from '~/components/ui/searchResult.vue'
@@ -98,68 +218,71 @@ export default class Volumes extends Vue {
     { text: '詳細情報', value: 'no' },
   ]
 
-  desserts: any[] = [
-    {
-      no: '00001',
-      '基本情報-経典番号': 'T0001',
-      '基本情報-枝番': 1,
-      title: '長阿含經',
-      '基本情報-収録巻次': '1',
-      '基本情報-部門': '阿含部上',
-      '基本情報-配本': '1',
+  currentPage: number = 1
+  size: number = 50
 
-      '基本情報-出版年月日': '19240408',
+  get total() {
+    return this.searchResults.length
+  }
 
-      kt: '底本',
-      '勘同目録-④': '麗本',
-      '勘同目録-⑦': '',
-      '勘同目録-⑦備考': '',
+  get paginationLength() {
+    return Math.ceil(this.total / this.size)
+  }
 
-      SAT頭出し用: {
-        '経典番号-ABC': 'T0001',
-        '枝番+ABC': '',
-        開始巻: '1',
-        ページ: '1',
-        段: 'a',
-        行: 1,
-      },
+  displayResults: any[] = []
+  searchResults: any[] = []
 
-      ft: '底本',
-      '脚注-新添': '',
-      '脚注-テキスト': '〔麗本〕',
-      '脚注-備考': '',
-    },
-    {
-      no: '00002',
-      '基本情報-経典番号': 'T0001',
-      '基本情報-枝番': 1,
-      title: '長阿含經',
-      '基本情報-収録巻次': '1',
-      '基本情報-部門': '阿含部上',
-      '基本情報-配本': '1',
+  async asyncData(context: any) {
+    const url = context.route.path.replace('/en/', '/')
+    const uri = url.replace('/search', '/index.json')
+    const apiResult = await context.$axios
+      .get(uri)
+      .then((response: any) => {
+        const apiResult = response.data
+        return apiResult
+      })
+      .catch((error: any) => {
+        // eslint-disable-next-line
+        console.error(error)
+      })
 
-      '基本情報-出版年月日': '19240408',
+    return {
+      searchResults: apiResult,
+    }
+  }
 
-      kt: '校本',
-      '勘同目録-④': '宋本',
-      '勘同目録-⑦': '',
-      '勘同目録-⑦備考': '',
+  created() {
+    this.main()
+  }
 
-      SAT頭出し用: {
-        '経典番号-ABC': 'T0001',
-        '枝番+ABC': '',
-        開始巻: '1',
-        ページ: '1',
-        段: 'a',
-        行: 1,
-      },
+  main() {
+    const from: number = (this.currentPage - 1) * this.size
+    this.displayResults = this.searchResults.slice(from, from + this.size)
+  }
 
-      ft: '校本',
-      '脚注-新添': '',
-      '脚注-テキスト': '〈宋〉',
-      '脚注-備考': '',
-    },
-  ]
+  @Watch('$route')
+  watchRoute() {
+    this.main()
+  }
+
+  setCurrentPage() {
+    if (this.currentPage > 0) {
+      const query: any = Object.assign({}, this.$route.query)
+      query.from = (this.currentPage - 1) * this.size
+      this.updateQuery(query)
+    }
+  }
+
+  updateQuery(query: any) {
+    this.$router.push(
+      this.localePath({
+        name: 'search',
+        query,
+      }),
+      () => {},
+      () => {}
+    )
+  }
 
   satUrl(data: any): string {
     return (

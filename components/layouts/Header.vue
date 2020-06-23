@@ -25,6 +25,19 @@
         <v-icon>mdi-magnify</v-icon> {{ $t('search') }}
       </v-btn>
 
+      <v-btn
+        class="mr-1"
+        text
+        depressed
+        :to="
+          localePath({
+            name: 'advanced',
+          })
+        "
+      >
+        <v-icon>mdi-magnify</v-icon> {{ $t('advanced_search') }}
+      </v-btn>
+
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <v-btn depressed btn v-on="on">
