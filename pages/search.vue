@@ -232,8 +232,6 @@ export default class Volumes extends Vue {
   displayResults: any[] = []
   searchResults: any[] = []
 
-  // baseUrl: any = process.env.BASE_URL
-
   async asyncData(context: any) {
     const uri = process.env.BASE_URL + '/index.json'
     const apiResult = await context.$axios
@@ -247,7 +245,12 @@ export default class Volumes extends Vue {
         console.error(error)
       })
 
+    const from: number = context.query.from ? Number(context.query.from) : 0
+
+    const currentPage = Math.round(from / 50) + 1
+
     return {
+      currentPage,
       searchResults: apiResult,
     }
   }
