@@ -18,13 +18,268 @@ def read_excel(path):
     map = {}
 
     for i in range(0, c_count):
-        label = df.iloc[0, i]
+        label = df.iloc[1, i]
         map[i] = label
 
-    data = {}
+    print(map)
 
-    for j in range(1, r_count):
+    data = []
+
+    uri_context = "https://webpark5032.sakura.ne.jp/tmp/sat/context.json"
+
+    context = {
+        "@context" : [
+            {
+                "ex" : "http://example.org/",
+                "data" : "https://nakamura196.github.io/sat/data",
+                "keiten" : "https://nakamura196.github.io/sat/経典番号/"
+            }
+        ]
+    }
+
+    with open("../static/context.json", 'w') as f:
+        json.dump(context, f, ensure_ascii=False, indent=4,
+        sort_keys=True, separators=(',', ': '))
+
+    for j in range(2, r_count):
         id = df.iloc[j, 0]
+        id = str(id).zfill(5)
+
+        print(id)
+
+        if id == "00000":
+            continue
+
+        経典番号 = df.iloc[j, 1]
+
+        uri = "data:"+id+".json"
+        uri_経典番号 = "keiten:"+経典番号+".json"
+
+        枝番 = df.iloc[j, 9] if not pd.isnull(df.iloc[j, 9]) else ""
+
+        # print(df.iloc[j, 8], df.iloc[j, 9], df.iloc[j, 10], df.iloc[j, 11], df.iloc[j, 12], df.iloc[j, 13])
+
+        uri_sat = "https://21dzk.l.u-tokyo.ac.jp/SAT2018/"+df.iloc[j, 8]+枝番+"_."+str(df.iloc[j, 10]).zfill(2)+"."+str(df.iloc[j, 11]).zfill(4)+df.iloc[j, 12]+str(df.iloc[j, 13]).zfill(2)+".html"
+
+        # --------
+
+        texts_k = []
+
+        for c in range(0, 5):
+
+            start = c * 10
+
+            if not pd.isnull(df.iloc[j, 22+start]):
+                obj = {
+                    "@id": uri+"#テキスト"+str(c+1)+"（勘同目録）",
+                    "ex:標準名称" : df.iloc[j, 22+start],
+                }
+                if not pd.isnull(df.iloc[j, 23+start]):
+                    obj["ex:巻"] = df.iloc[j, 23+start]
+                if not pd.isnull(df.iloc[j, 24+start]):
+                    obj["ex:国"] = df.iloc[j, 24+start]
+                if not pd.isnull(df.iloc[j, 25+start]):
+                    obj["ex:時代"] = df.iloc[j, 25+start]
+                if not pd.isnull(df.iloc[j, 26+start]):
+                    obj["ex:年"] = df.iloc[j, 26+start]
+                if not pd.isnull(df.iloc[j, 27+start]):
+                    obj["ex:～年"] = df.iloc[j, 27+start]
+                if not pd.isnull(df.iloc[j, 28+start]):
+                    obj["ex:刊写者"] = df.iloc[j, 28+start]
+
+                if not pd.isnull(df.iloc[j, 29+start]):
+                    obj["ex:刊写形態"] = df.iloc[j, 29+start]
+
+                if not pd.isnull(df.iloc[j, 30+start]):
+                    obj["ex:関与者"] = df.iloc[j, 30+start]
+
+                if not pd.isnull(df.iloc[j, 31+start]):
+                    obj["ex:関与形態"] = df.iloc[j, 31+start]
+
+                texts_k.append(obj)
+
+        # --------
+
+        holds_k = []
+
+        for c in range(0, 2):
+
+            start = c * 2
+
+            if not pd.isnull(df.iloc[j, 72+start]):
+                obj = {
+                    "@id": uri+"#所蔵者"+str(c+1)+"（勘同目録）",
+                    "ex:国" : df.iloc[j, 72+start],
+                }
+                if not pd.isnull(df.iloc[j, 73+start]):
+                    obj["ex:所蔵者"] = df.iloc[j, 73+start]
+                holds_k.append(obj)
+
+        # --------
+
+        obj_k = {
+            "@id" : uri+"#勘同目録",
+            "ex:底本/校本" : df.iloc[j, 14],
+            "ex:texts" : texts_k,
+            "ex:所蔵者" : holds_k
+        }
+
+        if not pd.isnull(df.iloc[j, 15]):
+            obj_k["ex:❹"] = df.iloc[j, 15]
+
+        if not pd.isnull(df.iloc[j, 16]):
+            obj_k["ex:❼"] = df.iloc[j, 16]
+
+        if not pd.isnull(df.iloc[j, 17]):
+            obj_k["ex:❼備考"] = df.iloc[j, 17]
+
+        # --------
+
+        texts_f = []
+  
+        for c in range(0, 3):
+
+            start = c * 10
+
+            if not pd.isnull(df.iloc[j, 79+start]):
+                obj = {
+                    "@id": uri+"#テキスト"+str(c+1)+"（脚注）",
+                    "ex:標準名称" : df.iloc[j, 79+start],
+                }
+                if not pd.isnull(df.iloc[j, 80+start]):
+                    obj["ex:巻"] = df.iloc[j, 80+start]
+
+                if not pd.isnull(df.iloc[j, 81+start]):
+                    obj["ex:国"] = df.iloc[j, 81+start]
+                if not pd.isnull(df.iloc[j, 82+start]):
+                    obj["ex:時代"] = df.iloc[j, 82+start]
+                if not pd.isnull(df.iloc[j, 83+start]):
+                    obj["ex:年"] = df.iloc[j, 83+start]
+                if not pd.isnull(df.iloc[j, 84+start]):
+                    obj["ex:～年"] = df.iloc[j, 84+start]
+                if not pd.isnull(df.iloc[j, 85+start]):
+                    obj["ex:刊写者"] = df.iloc[j, 85+start]
+
+                if not pd.isnull(df.iloc[j, 86+start]):
+                    obj["ex:刊写形態"] = df.iloc[j, 86+start]
+
+                if not pd.isnull(df.iloc[j, 87+start]):
+                    obj["ex:関与者"] = df.iloc[j, 87+start]
+
+                if not pd.isnull(df.iloc[j, 88+start]):
+                    obj["ex:関与形態"] = df.iloc[j, 88+start]
+
+                texts_f.append(obj)
+       
+
+        # --------
+
+        holds_f = []
+
+        for c in range(0, 2):
+
+            start = c * 2
+            
+            index = 109 + start
+            if not pd.isnull(df.iloc[j, index]):
+                obj = {
+                    "@id": uri+"#所蔵者"+str(c+1)+"（脚注）",
+                    "ex:国" : df.iloc[j, index],
+                }
+                index = 110 + start
+                if not pd.isnull(df.iloc[j, index]):
+                    obj["ex:所蔵者"] = df.iloc[j, index]
+                holds_f.append(obj)
+
+        # --------
+
+        obj_f = {
+            "@id" : uri+"#脚注",
+            "ex:texts" : texts_f,
+            "ex:所蔵者" : holds_f
+        }
+
+        if not pd.isnull(df.iloc[j, 18]):
+            obj_f["ex:底本/校本"] = df.iloc[j, 18]
+
+        if not pd.isnull(df.iloc[j, 19]):
+            obj_f["ex:新添"] = df.iloc[j, 19]
+
+        if not pd.isnull(df.iloc[j, 20]):
+            obj_f["ex:テキスト"] = df.iloc[j, 20]
+
+        if not pd.isnull(df.iloc[j, 21]):
+            obj_f["ex:備考"] = df.iloc[j, 21]
+
+        if not pd.isnull(df.iloc[j, 76]):
+            obj_f["ex:底本推定"] = df.iloc[j, 76]
+
+        if not pd.isnull(df.iloc[j, 77]):
+            obj_f["ex:略号の使用"] = df.iloc[j, 77]
+
+        if not pd.isnull(df.iloc[j, 78]):
+            obj_f["ex:略号解説"] = df.iloc[j, 78]
+
+        # --------
+
+        keiten = {
+            "@id" : uri_経典番号,
+            "ex:経典番号" : 経典番号,
+            "ex:枝番" : df.iloc[j, 2],
+            "ex:経典名" : df.iloc[j, 3],
+            "ex:収録巻次" : df.iloc[j, 4],
+            "ex:部門" : df.iloc[j, 5],
+            "ex:配本" : df.iloc[j, 6],
+            
+        }
+
+        date = str(df.iloc[j, 7]).split(",")
+        keiten["ex:出版年月日"] = []
+
+        for d in date:
+            d = str(d)
+            keiten["ex:出版年月日"].append(d[0:4]+"-"+d[4:6]+"-"+d[6:8])
+
+        # --------
+        
+        obj = {
+            "@id" : uri,
+            "@context": uri_context,
+            "ex:基本情報" : [
+                {
+                    "@id" : uri+"#基本情報",
+                    "ex:No." : id,
+                    "ex:経典" : [
+                        keiten
+                    ]
+                }
+            ],
+            "ex:sat" : [
+                {
+                    "@id" : uri+"#SAT頭出し用",
+                    "ex:url" : uri_sat,
+                }
+            ],
+            "ex:勘同目録" : [
+                obj_k
+            ],
+            "ex:脚注" : [
+                obj_f
+            ]
+        }
+
+        data.append(obj)
+
+        with open("../static/data/"+id+".json", 'w') as f:
+            json.dump(obj, f, ensure_ascii=False, indent=4,
+            sort_keys=True, separators=(',', ': '))
+
+        '''
+        if len(data) > 20:
+            break
+
+        
+        
         data[id] = []
 
         for i in map:
@@ -36,7 +291,13 @@ def read_excel(path):
                     "value": html.unescape(str(value))
                 })
 
-    return data
+        '''
+
+    with open("../static/data.json", 'w') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4,
+        sort_keys=True, separators=(',', ': '))
+
+    # return data
 
 
 def read_excel2(path):
@@ -60,9 +321,11 @@ def read_excel2(path):
     return map
 
 
-path = "data/sougouwebcp.xlsx"
-data1 = read_excel(path)
+path = "data/『大正新脩大蔵経』底本・校本一覧データベース.xlsx"
+# data1 = read_excel(path)
+read_excel(path)
 
+'''
 # print(data1)
 data2 = read_excel2("data/data.xlsx")
 
@@ -115,19 +378,6 @@ for key in data2:
         "metadata" : metadata
         })
 
-    '''
-    manifests.append(
-        {
-        "@id": "https://iiif.dl.itc.u-tokyo.ac.jp/repo/iiif/"+uuid+"/manifest",
-        "@type": "sc:Manifest",
-        "label": str(key),
-        "license": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "thumbnail": data2[key]["thumbnail"],
-        "metadata" : metadata
-        }
-    )
-    '''
-
 collections = []
 
 with open('data/vols.json') as f:
@@ -158,17 +408,6 @@ for obj in df:
         "collections": colls # map[vol]
     })
 
-'''
-for vol in map:
-    collections.append({
-        # "@context": "http://iiif.io/api/presentation/2/context.json",
-        # "@id": "https://nakamura196.github.io/piranesi/print/iiif/vol.json",
-        "label": vol,
-        # "@type": "sc:Collection",
-        # "vhint": "use-thumb",
-        "manifests": map[vol]
-    })
-'''
 
 collection = {
   "@context": "http://iiif.io/api/presentation/2/context.json",
@@ -182,3 +421,5 @@ collection = {
 with open("../docs/print/iiif/top2.json", 'w') as f:
     json.dump(collection, f, ensure_ascii=False, indent=4,
     sort_keys=True, separators=(',', ': '))
+
+'''
