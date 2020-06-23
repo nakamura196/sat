@@ -1,6 +1,9 @@
 <template>
   <div>
-    <v-container v-if="apiResult" class="mt-10">
+    <v-container v-if="apiResult">
+      <h2 class="text-center my-5">
+        {{ $t('詳細情報') }}
+      </h2>
       <table
         border="1"
         style="border-collapse: collapse;"
@@ -104,6 +107,16 @@
                     apiResult['ex:勘同目録'][0]['ex:texts'][n - 1]
                       ? apiResult['ex:勘同目録'][0]['ex:texts'][n - 1][
                           'ex:' + field
+                        ]
+                      : ''
+                  }}
+                  {{
+                    field == '年' &&
+                    apiResult['ex:勘同目録'][0]['ex:texts'][n - 1] &&
+                    apiResult['ex:勘同目録'][0]['ex:texts'][n - 1]['ex:～年']
+                      ? ' - ' +
+                        apiResult['ex:勘同目録'][0]['ex:texts'][n - 1][
+                          'ex:～年'
                         ]
                       : ''
                   }}

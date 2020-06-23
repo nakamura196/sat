@@ -1,11 +1,18 @@
 <template>
   <div>
     <v-container>
-      <h2 class="my-5">
-        {{ $t('search_result') }}
+      <h2 class="text-center my-5">
+        {{ $t('検索結果一覧') }}
       </h2>
 
-      <h3 class="my-5">{{ total.toLocaleString() }}{{ $t('hits') }}</h3>
+      <v-row>
+        <v-col>
+          <b>{{ total.toLocaleString() }}{{ $t('hits') }}</b>
+        </v-col>
+        <v-col class="text-right">
+          <a>検索結果に関する統計情報を見る</a>
+        </v-col>
+      </v-row>
 
       <div class="text-center mb-5">
         <v-pagination

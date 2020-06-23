@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-container>
-      <h2 class="my-5">{{ $t('advanced_search') }}</h2>
+      <h2 class="text-center my-5">{{ $t('advanced_search') }}</h2>
 
       <h3>経典番号</h3>
 
