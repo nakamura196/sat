@@ -120,10 +120,12 @@ def read_excel(path):
 
         obj_k = {
             "@id" : uri+"#勘同目録",
-            "ex:底本/校本" : df.iloc[j, 14],
             "ex:texts" : texts_k,
             "ex:所蔵者" : holds_k
         }
+
+        if not pd.isnull(df.iloc[j, 14]):
+            obj_k["ex:底本/校本"] = df.iloc[j, 14]
 
         if not pd.isnull(df.iloc[j, 15]):
             obj_k["ex:❹"] = df.iloc[j, 15]

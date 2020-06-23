@@ -310,6 +310,8 @@ export default class Search extends Vue {
         console.error(error)
       })
 
+    console.log({ apiResult })
+
     return {
       apiResult,
       uri,
