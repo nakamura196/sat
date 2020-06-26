@@ -96,11 +96,16 @@
                 {{ apiResult['ex:脚注'][0]['ex:新添'] }}
               </td>
               <td class="pl-1 text-left">
-                <template v-if="!true">
-                  <a href="#">{{ apiResult['ex:脚注'][0]['ex:テキスト'] }}</a>
-                </template>
-                <template v-else>
-                  {{ apiResult['ex:脚注'][0]['ex:テキスト'] }}
+                <template>
+                  <a
+                    :href="
+                      'http://mirador.cultural.jp/?manifest=https://d1av1vcgsldque.cloudfront.net/iiif/' +
+                      id.slice(1) +
+                      '/manifest.json'
+                    "
+                    target="_blank"
+                    >{{ apiResult['ex:脚注'][0]['ex:テキスト'] }}</a
+                  >
                 </template>
               </td>
               <td class="pl-1 text-left">
@@ -136,7 +141,7 @@
                     {{ 'テキスト' + n }}<br />{{ '（脚注）' }}
                   </td>
                   <td>テキスト推定</td>
-                  <td colspan="2">
+                  <td class="pl-1 text-left" colspan="2">
                     {{ apiResult['ex:脚注'][0]['ex:底本推定'] }}
                   </td>
                 </tr>
@@ -144,7 +149,7 @@
                   <td bgcolor="#B0BEC5"></td>
                   <td bgcolor="#B0BEC5" colspan="2"></td>
                   <td>略号使用</td>
-                  <td colspan="2">
+                  <td class="pl-1 text-left" colspan="2">
                     {{ apiResult['ex:脚注'][0]['ex:略号の使用'] }}
                   </td>
                 </tr>
@@ -152,7 +157,7 @@
                   <td bgcolor="#B0BEC5"></td>
                   <td bgcolor="#B0BEC5" colspan="2"></td>
                   <td>略号解説</td>
-                  <td colspan="2">
+                  <td class="pl-1 text-left" colspan="2">
                     {{ apiResult['ex:脚注'][0]['ex:略号解説'] }}
                   </td>
                 </tr>
@@ -166,7 +171,7 @@
                   {{ 'テキスト' + n }}<br />{{ '（勘同目録）' }}
                 </td>
                 <td>{{ field }}</td>
-                <td colspan="2">
+                <td class="pl-1 text-left" colspan="2">
                   {{
                     apiResult['ex:勘同目録'][0]['ex:texts'][n - 1]
                       ? apiResult['ex:勘同目録'][0]['ex:texts'][n - 1][
@@ -198,7 +203,11 @@
                 <td :bgcolor="n < 4 ? '' : '#B0BEC5'">
                   {{ n > 3 ? '' : field }}
                 </td>
-                <td colspan="2" :bgcolor="n < 4 ? '' : '#B0BEC5'">
+                <td
+                  class="pl-1 text-left"
+                  colspan="2"
+                  :bgcolor="n < 4 ? '' : '#B0BEC5'"
+                >
                   {{
                     apiResult['ex:脚注'][0]['ex:texts'][n - 1]
                       ? apiResult['ex:脚注'][0]['ex:texts'][n - 1][
@@ -220,7 +229,7 @@
                   {{ '所蔵者' + n }}<br />{{ '（勘同目録）' }}
                 </td>
                 <td>{{ field }}</td>
-                <td colspan="2">
+                <td class="pl-1 text-left" colspan="2">
                   {{
                     apiResult['ex:勘同目録'][0]['ex:所蔵者'][n - 1]
                       ? apiResult['ex:勘同目録'][0]['ex:所蔵者'][n - 1][
@@ -234,7 +243,7 @@
                   {{ '所蔵者' + n }}<br />{{ '（脚注）' }}
                 </td>
                 <td>{{ field }}</td>
-                <td colspan="2">
+                <td class="pl-1 text-left" colspan="2">
                   {{
                     apiResult['ex:脚注'][0]['ex:所蔵者'][n - 1]
                       ? apiResult['ex:脚注'][0]['ex:所蔵者'][n - 1][
@@ -308,6 +317,7 @@ export default class Search extends Vue {
   uri: string = ''
   url: string = ''
   title: string = ''
+  id: string = ''
 
   async asyncData(context: any) {
     const itemId = `${context.params.id}`
@@ -327,6 +337,7 @@ export default class Search extends Vue {
     console.log({ apiResult })
 
     return {
+      id: itemId,
       apiResult,
       uri,
       url,

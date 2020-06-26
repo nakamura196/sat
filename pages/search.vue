@@ -111,7 +111,17 @@
             {{ obj['脚-底本/校本'] }}
           </td>
           <td width="5%" class="pl-1 text-left">{{ obj['脚-新添部分'] }}</td>
-          <td width="10%" class="pl-1 text-left">{{ obj['脚-テキスト'] }}</td>
+          <td width="10%" class="pl-1 text-left">
+            <a
+              :href="
+                'http://mirador.cultural.jp/?manifest=https://d1av1vcgsldque.cloudfront.net/iiif/' +
+                ('0000' + obj['No.']).slice(-4) +
+                '/manifest.json'
+              "
+              target="_blank"
+              >{{ obj['脚-テキスト'] }}</a
+            >
+          </td>
           <td width="10%" class="pl-1 text-left">{{ obj['脚-備考'] }}</td>
 
           <td width="5%">
@@ -268,6 +278,10 @@ export default class Volumes extends Vue {
 
   main() {
     const from: number = (this.currentPage - 1) * this.size
+
+    if (this.$route.query.size) {
+      this.size = Number(this.$route.query.size)
+    }
     this.displayResults = this.searchResults.slice(from, from + this.size)
   }
 

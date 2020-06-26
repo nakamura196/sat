@@ -38,6 +38,16 @@
         <v-icon>mdi-magnify</v-icon> {{ $t('advanced_search') }}
       </v-btn>
 
+      <v-btn
+        class="mr-1"
+        text
+        depressed
+        href="https://www.kanzaki.com/works/2016/pub/image-annotator?u=https%3A%2F%2Fd1av1vcgsldque.cloudfront.net%2Fiiif%2Fcollection%2F%25E9%2585%2589%25E8%2593%25AE%25E7%25A4%25BE%25E7%2594%25BB%25E5%2583%258F.json"
+        target="_blank"
+      >
+        <v-icon>mdi-image</v-icon> {{ $t('iiif_collection') }}
+      </v-btn>
+
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <v-btn depressed btn v-on="on">
