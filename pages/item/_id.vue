@@ -99,7 +99,7 @@
                 <template>
                   <a
                     :href="
-                      'http://mirador.cultural.jp/?manifest=https://d1av1vcgsldque.cloudfront.net/iiif/' +
+                      'http://www.kanzaki.com/works/2016/pub/image-annotator?u=https://d1av1vcgsldque.cloudfront.net/iiif/' +
                       id.slice(1) +
                       '/manifest.json'
                     "

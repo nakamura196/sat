@@ -114,7 +114,7 @@
           <td width="10%" class="pl-1 text-left">
             <a
               :href="
-                'http://mirador.cultural.jp/?manifest=https://d1av1vcgsldque.cloudfront.net/iiif/' +
+                'http://www.kanzaki.com/works/2016/pub/image-annotator?u=https://d1av1vcgsldque.cloudfront.net/iiif/' +
                 ('0000' + obj['No.']).slice(-4) +
                 '/manifest.json'
               "
