@@ -3,6 +3,10 @@
     <v-container>
       <h2 class="text-center my-5">{{ $t('advanced_search') }}</h2>
 
+      <v-alert type="warning">
+        まだ動きません。
+      </v-alert>
+
       <h3>経典番号</h3>
 
       <v-row>

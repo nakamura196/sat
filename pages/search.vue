@@ -10,7 +10,7 @@
           </v-col>
           <v-col cols="12" sm="7">
             <v-row dense>
-              <template v-if="layout !== 'stats'">
+              <template>
                 <v-col cols="12" sm="3">
                   <v-select
                     v-model="sort"
@@ -68,7 +68,6 @@
           <template v-if="total > 0">
             <div class="text-center">
               <v-pagination
-                v-show="layout !== 'stats'"
                 v-model="currentPage"
                 :length="paginationLength"
                 :total-visible="7"
@@ -118,68 +117,94 @@
                 :key="index"
                 class="text-center"
               >
-                <td width="5%">{{ obj['基-経典番号'] }}</td>
-                <td width="2%">{{ obj['基-枝番'] }}</td>
+                <td width="5%">
+                  {{ $utils.formatArrayValue(obj._source['基-経典番号']) }}
+                </td>
+                <td width="2%">
+                  {{ $utils.formatArrayValue(obj._source['基-枝番']) }}
+                </td>
                 <td width="10%" class="pl-1 text-left">
                   <a
                     :href="
                       'https://21dzk.l.u-tokyo.ac.jp/SAT2018/' +
-                      obj['sat_id'] +
+                      $utils.formatArrayValue(obj._source['sat_id']) +
                       '.html'
                     "
                     target="_blank"
-                    >{{ obj['基-経典名'] }}</a
+                    >{{ $utils.formatArrayValue(obj._source['基-経典名']) }}</a
                   >
                 </td>
-                <td width="2%">{{ obj['基-収録巻次'] }}</td>
-                <td width="5%" class="pl-1 text-left">{{ obj['基-部門'] }}</td>
-                <td width="2%">{{ obj['基-配本'] }}</td>
-                <td width="5%">{{ obj['基-年月日'].join(', ') }}</td>
+                <td width="2%">
+                  {{ $utils.formatArrayValue(obj._source['基-収録巻次']) }}
+                </td>
+                <td width="5%" class="pl-1 text-left">
+                  {{ $utils.formatArrayValue(obj._source['基-部門']) }}
+                </td>
+                <td width="2%">
+                  {{ $utils.formatArrayValue(obj._source['基-配本']) }}
+                </td>
+                <td width="5%">
+                  {{ $utils.formatArrayValue(obj._source['基-年月日']) }}
+                </td>
                 <td
                   width="5%"
                   :bgcolor="
-                    obj['勘-底本/校本'] == '底本'
+                    $utils.formatArrayValue(obj._source['勘-底本/校本']) ==
+                    '底本'
                       ? '#BBDEFB'
-                      : obj['勘-底本/校本'] == '校本'
+                      : $utils.formatArrayValue(obj._source['勘-底本/校本']) ==
+                        '校本'
                       ? '#FFCDD2'
                       : ''
                   "
                 >
-                  {{ obj['勘-底本/校本'] }}
+                  {{ $utils.formatArrayValue(obj._source['勘-底本/校本']) }}
                 </td>
-                <td width="10%" class="pl-1 text-left">{{ obj['勘-❹'] }}</td>
-                <td width="10%" class="pl-1 text-left">{{ obj['勘-❼'] }}</td>
                 <td width="10%" class="pl-1 text-left">
-                  {{ obj['勘-❼備考'] }}
+                  {{ $utils.formatArrayValue(obj._source['勘-❹']) }}
+                </td>
+                <td width="10%" class="pl-1 text-left">
+                  {{ $utils.formatArrayValue(obj._source['勘-❼']) }}
+                </td>
+                <td width="10%" class="pl-1 text-left">
+                  {{ $utils.formatArrayValue(obj._source['勘-❼備考']) }}
                 </td>
 
                 <td
                   width="5%"
                   :bgcolor="
-                    obj['脚-底本/校本'] == '底本'
+                    $utils.formatArrayValue(obj._source['脚-底本/校本']) ==
+                    '底本'
                       ? '#BBDEFB'
-                      : obj['脚-底本/校本'] == '校本'
+                      : $utils.formatArrayValue(obj._source['脚-底本/校本']) ==
+                        '校本'
                       ? '#FFCDD2'
                       : ''
                   "
                 >
-                  {{ obj['脚-底本/校本'] }}
+                  {{ $utils.formatArrayValue(obj._source['脚-底本/校本']) }}
                 </td>
                 <td width="5%" class="pl-1 text-left">
-                  {{ obj['脚-新添部分'] }}
+                  {{ $utils.formatArrayValue(obj._source['脚-新添部分']) }}
                 </td>
                 <td width="10%" class="pl-1 text-left">
                   <a
                     :href="
                       'http://www.kanzaki.com/works/2016/pub/image-annotator?u=https://d1av1vcgsldque.cloudfront.net/iiif/' +
-                      ('0000' + obj['No.']).slice(-4) +
+                      (
+                        '0000' + $utils.formatArrayValue(obj._source['No.'])
+                      ).slice(-4) +
                       '/manifest.json'
                     "
                     target="_blank"
-                    >{{ obj['脚-テキスト'] }}</a
+                    >{{
+                      $utils.formatArrayValue(obj._source['脚-テキスト'])
+                    }}</a
                   >
                 </td>
-                <td width="10%" class="pl-1 text-left">{{ obj['脚-備考'] }}</td>
+                <td width="10%" class="pl-1 text-left">
+                  {{ $utils.formatArrayValue(obj._source['脚-備考']) }}
+                </td>
 
                 <td width="5%">
                   <nuxt-link
@@ -188,7 +213,10 @@
                       localePath({
                         name: 'item-id',
                         params: {
-                          id: ('00000' + obj['No.']).slice(-5),
+                          id: (
+                            '00000' +
+                            $utils.formatArrayValue(obj._source['No.'])
+                          ).slice(-5),
                         },
                       })
                     "
@@ -200,7 +228,6 @@
 
             <div class="text-center">
               <v-pagination
-                v-show="layout !== 'stats'"
                 v-model="currentPage"
                 :length="paginationLength"
                 :total-visible="7"
@@ -323,6 +350,8 @@ export default class search extends Vue {
       store.state.query
     )
 
+    console.log({ result, esQuery })
+
     context.store.commit('setResult', result)
 
     // --------
@@ -360,16 +389,6 @@ export default class search extends Vue {
 
     const currentPage = state.from / state.size + 1
     store.commit('setCurrentPage', currentPage)
-
-    const layout: any = routeQuery.layout
-    if (layout) {
-      store.commit('setLayout', layout)
-    }
-
-    const col: any = routeQuery.col
-    if (col) {
-      store.commit('setCol', Number(col))
-    }
 
     if (process.browser) {
       window.scrollTo(0, 0)
@@ -424,11 +443,15 @@ export default class search extends Vue {
 
   get computedItemsSort() {
     const arr: any[] = [
+      /*
       {
         value: '_score:desc',
         text: this.$t('relevance'),
       },
+      */
     ]
+
+    console.log(this.sort)
 
     const orders = ['asc', 'desc']
 
@@ -443,6 +466,10 @@ export default class search extends Vue {
           value: value + '.keyword:' + order,
           text: label + ' ' + this.$t(order),
         })
+      }
+
+      if (i === 0 && this.sort == null) {
+        this.sort = value + '.keyword:asc'
       }
     }
 

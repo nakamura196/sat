@@ -448,6 +448,15 @@ export class SearchUtils {
   }
 
   async createIndexFromArray(uri: string): Promise<any> {
+    const mapping: any = {
+      mappings: {
+        properties: {
+          'No.': { type: 'integer' },
+          '基-配本': { type: 'integer' },
+        },
+      },
+    }
+
     const data = await axios.get(uri).then((response) => {
       const arr = response.data
 
@@ -475,7 +484,14 @@ export class SearchUtils {
               continue
             }
 
-            value = String(value)
+            if (
+              mapping.mappings.properties[key] &&
+              mapping.mappings.properties[key].type === 'integer'
+            ) {
+              // そのまま
+            } else {
+              value = String(value)
+            }
 
             if (!index[key][value]) {
               index[key][value] = []
@@ -499,7 +515,18 @@ export class SearchUtils {
 
         index[key][fulltext].push(i)
 
-        data.push(obj)
+        const _source: any = {}
+
+        for (const key in obj) {
+          _source[key] = convert2arr(obj[key])
+        }
+
+        const e: any = {
+          _id: obj['No.'],
+          _source,
+        }
+
+        data.push(e)
       }
 
       return {
@@ -607,26 +634,6 @@ export class SearchUtils {
         hits: results,
         total: {
           relation: query.sort,
-          value: dataFiltered.length,
-        },
-      },
-    }
-
-    return result
-  }
-
-  search2(all: any) {
-    const indexes = this.filter(all.index, all.data, all.query)
-    let dataFiltered = this.getDataFiltered(indexes, all.data)
-    const facets = this.createFacets(all.index, indexes, all.query.aggs)
-    dataFiltered = this.sortData(all.query.sort, dataFiltered)
-    const results = this.getResult(dataFiltered, all.query.from, all.query.size)
-    const result: any = {
-      aggregations: facets,
-      hits: {
-        hits: results,
-        total: {
-          relation: all.query.sort,
           value: dataFiltered.length,
         },
       },
@@ -791,10 +798,17 @@ export class SearchUtils {
 
       const mapNew: any = {}
       for (const value in map) {
-        const intersection = new Set(
-          [...new Set(indexes)].filter((e) => new Set(map[value]).has(e))
-        )
-        const docCount = intersection.size
+        const intersection = []
+        const values = map[value]
+
+        for (let i = 0; i < values.length; i++) {
+          if (indexes.includes(values[i])) {
+            intersection.push(values[i])
+          }
+        }
+
+        const docCount = intersection.length
+
         if (docCount > 0) {
           mapNew[value] = docCount
         }
@@ -836,11 +850,14 @@ export class SearchUtils {
   }
 
   sortData(sort: any, dataFiltered: any): any {
-    console.log({ sort })
-    /*
-    const tmp = sort.split(':')
-    let field: string = tmp[0]
-    const type: string = tmp[1]
+    const sortObj: any = convert2arr(sort)[0]
+    if (!sortObj) {
+      return dataFiltered
+    }
+    let field = Object.keys(sortObj)[0]
+    const type: string = sortObj[field].order
+
+    field = field.replace('.keyword', '')
 
     let ascFlg = true
     if (type === 'desc') {
@@ -854,16 +871,12 @@ export class SearchUtils {
       v2 *= -1
     }
 
-    if (!dataFiltered[field]) {
-      field = '_title'
-    }
-
-    dataFiltered.sort(function(a: any, b: any) {
+    dataFiltered.sort(function (a: any, b: any) {
       if (a._source[field][0] > b._source[field][0]) return v1
       if (a._source[field][0] < b._source[field][0]) return v2
       return 0
     })
-    */
+
     return dataFiltered
   }
 

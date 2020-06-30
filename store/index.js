@@ -9,7 +9,7 @@ function convert2arr(value) {
 }
 
 export const state = () => ({
-  sort: '_score:desc',
+  sort: null,
   size: 20,
 
   from: 0,
@@ -46,7 +46,7 @@ export const state = () => ({
 
 export const mutations = {
   init(state) {
-    state.sort = '_score:desc'
+    state.sort = null
     state.size = 20
     state.from = 0
     state.currentPage = 1
