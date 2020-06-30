@@ -1,52 +1,73 @@
 <template>
-  <div v-if="filterShowFlag && query">
+  <div v-show="filterShowFlag">
     <v-divider />
-
     <v-container>
-      <span class="mr-2">{{ $t('filter') }}</span>
-
+      <span class="ma-1">{{ $t('filter') }}</span>
       <template v-if="query.keyword">
-        <v-btn
-          v-for="(keyword, index) in query.keyword"
+        <v-chip
+          v-for="(value, index) in query.keyword"
           :key="index"
-          color="primary"
+          style="white-space: normal; word-wrap: break-word;"
           class="ma-1"
-          size="sm"
-          @click="removeKeyword(keyword)"
+          close
+          color="primary"
+          label
+          text-color="white"
+          @click:close="removeKey(value, 'keyword')"
         >
-          <span>{{ $t('keyword') }}: </span>
-          <b class="mr-2">{{ keyword }}</b>
-          <span aria-hidden="true">&times;</span>
-        </v-btn>
+          {{ $t('keyword') }}: {{ value }}
+        </v-chip>
       </template>
 
-      <template v-for="(type, t) in ['fc', 'q']">
-        <template v-for="(agg, label) in query.advanced[type]">
-          <span :key="t + '-' + label">
-            <template v-for="method in ['+', '-']">
-              <v-btn
-                v-for="(value, m) in agg[method]"
-                :key="m"
-                color="primary"
-                class="ma-1"
-                size="sm"
-                @click="
-                  removeAdvanced(
-                    label,
-                    [method === '+' ? value : '-' + value],
-                    type
-                  )
-                "
-              >
-                {{ getLabel(label) }}:
-                <b class="mr-2">
-                  {{ method === '+' ? value : '-' + value }}
-                </b>
-                <span aria-hidden="true">&times;</span>
-              </v-btn>
-            </template>
-          </span>
+      <template v-for="(agg, label) in query.advanced">
+        <template v-for="key in ['+', '-']">
+          <v-chip
+            v-for="(value, index2) in agg[key]"
+            :key="label + '-' + index2"
+            style="white-space: normal; word-wrap: break-word;"
+            class="ma-1"
+            close
+            color="primary"
+            label
+            text-color="white"
+            @click:close="removeFc(label, [key === '+' ? value : '-' + value])"
+          >
+            {{ $t(label.replace('fc-', '').replace('q-', '')) }}:
+            {{ key === '+' ? value : '-' + value }}
+          </v-chip>
         </template>
+      </template>
+
+      <template v-if="query.after">
+        <v-chip
+          v-for="(value, index) in query.after"
+          :key="index"
+          style="white-space: normal; word-wrap: break-word;"
+          class="ma-1"
+          close
+          color="primary"
+          label
+          text-color="white"
+          @click:close="removeKey(value, 'after')"
+        >
+          {{ $t('after') }}: {{ value }}
+        </v-chip>
+      </template>
+
+      <template v-if="query.before">
+        <v-chip
+          v-for="(value, index) in query.before"
+          :key="index"
+          style="white-space: normal; word-wrap: break-word;"
+          class="ma-1"
+          close
+          color="primary"
+          label
+          text-color="white"
+          @click:close="removeKey(value, 'before')"
+        >
+          {{ $t('before') }}: {{ value }}
+        </v-chip>
       </template>
     </v-container>
   </div>
@@ -54,38 +75,37 @@
 
 <script lang="ts">
 import { Vue, Component } from 'nuxt-property-decorator'
-import { queryStore } from '~/store'
 
 @Component
 export default class searchfilter extends Vue {
-  query: any = null
+  query: any = this.$store.state
+  // query: any = this.$route.query
 
-  created() {
-    this.query = queryStore.query
-  }
-
-  removeKeyword(value: string) {
-    queryStore.removeKeywords([value])
+  removeKey(value: string, label: string) {
+    const data: any = {
+      label,
+      value: [value],
+    }
+    this.$store.commit('removeKey', data)
     this.$router.push(
       this.localePath({
         name: 'search',
-        query: this.$utils.getSearchQueryFromQueryStore(queryStore.query),
+        query: this.$utils.getSearchQueryFromQueryStore(this.$store.state),
       }),
       () => {},
       () => {}
     )
   }
 
-  removeAdvanced(label: string, values: string[], type: string) {
-    queryStore.removeAdvanced({
+  removeFc(label: string, values: string[]) {
+    this.$store.commit('removeFc', {
       label,
       values,
-      type,
     })
 
     // push 処理
     const query: any = this.$utils.getSearchQueryFromQueryStore(
-      queryStore.query
+      this.$store.state
     )
 
     this.$router.push(
@@ -101,42 +121,15 @@ export default class searchfilter extends Vue {
   get filterShowFlag(): boolean {
     let flag = false
     const query = this.query
-    if (!query) {
-      return flag
-    }
     if (
       query.keyword.length > 0 ||
-      Object.keys(query.advanced.fc).length > 0 ||
-      Object.keys(query.advanced.q).length > 0
+      query.after.length > 0 ||
+      query.before.length > 0 ||
+      Object.keys(query.advanced).length > 0
     ) {
       flag = true
     }
     return flag
-  }
-
-  getLabel(term: string): string {
-    const termLabels = queryStore.query.termLabels
-    const types: any = {
-      'fc-': this.$t('facet'),
-      'q-': this.$t('advanced'),
-    }
-
-    let result: string = ''
-
-    for (const type in types) {
-      if (term.startsWith(type)) {
-        const label = term.replace(type, '')
-
-        result =
-          types[type] +
-          '-' +
-          (termLabels && termLabels[label] ? termLabels[label] : label)
-
-        break
-      }
-    }
-
-    return result
   }
 }
 </script>

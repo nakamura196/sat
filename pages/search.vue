@@ -1,293 +1,379 @@
 <template>
   <div>
-    <v-container>
-      <h2 class="text-center my-5">
-        {{ $t('検索結果一覧') }}
-      </h2>
+    <SearchForm />
 
+    <div style="background-color: #eeeeee;">
+      <v-container class="pt-5">
+        <v-row no-gutters align="center">
+          <v-col cols="12" sm="5">
+            <h3 class="my-5">{{ total.toLocaleString() }}{{ $t('hits') }}</h3>
+          </v-col>
+          <v-col cols="12" sm="7">
+            <v-row dense>
+              <template v-if="layout !== 'stats'">
+                <v-col cols="12" sm="3">
+                  <v-select
+                    v-model="sort"
+                    :items="computedItemsSort"
+                    :label="$t('Sort by')"
+                    @change="setSort"
+                  ></v-select>
+                </v-col>
+
+                <v-col cols="12" sm="3" dense>
+                  <v-select
+                    v-model="size"
+                    :items="[
+                      { value: 20, text: '20' },
+                      { value: 50, text: '50' },
+                      { value: 100, text: '100' },
+                      { value: 500, text: '500' },
+                    ]"
+                    :label="$t('items_per_page')"
+                    @change="setSize"
+                  ></v-select>
+                </v-col>
+              </template>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-container>
+
+      <SearchFilter />
+    </div>
+
+    <v-container v-show="!loadingFlag" class="mt-5">
       <v-row>
-        <v-col>
-          <b>{{ total.toLocaleString() }}{{ $t('hits') }}</b>
+        <v-col cols="12" :sm="facetFlag ? 8 : 12" order-sm="12">
+          <h3 class="mb-5">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <i
+                  v-show="!facetFlag"
+                  style="cursor: pointer;"
+                  class="far fa-caret-square-right mr-2"
+                  v-on="on"
+                  @click="facetFlag = !facetFlag"
+                ></i>
+              </template>
+              <span>{{ $t('open_facets') }}</span>
+            </v-tooltip>
+            {{ $t('search_result') }}
+          </h3>
+
+          <p class="text-right">
+            <a>検索結果に関する統計情報を見る</a>
+          </p>
+
+          <template v-if="total > 0">
+            <div class="text-center">
+              <v-pagination
+                v-show="layout !== 'stats'"
+                v-model="currentPage"
+                :length="paginationLength"
+                :total-visible="7"
+                @input="setCurrentPage"
+              ></v-pagination>
+            </div>
+
+            <table
+              border="1"
+              style="border-collapse: collapse;"
+              width="100%"
+              class="my-2"
+            >
+              <tr>
+                <th colspan="7">
+                  {{ '基本情報' }}
+                </th>
+                <th colspan="4">
+                  {{ '勘同目録' }}
+                </th>
+                <th colspan="4">
+                  {{ '脚注' }}
+                </th>
+                <th rowspan="2">詳細情報</th>
+              </tr>
+              <tr>
+                <th>{{ '経典番号' }}</th>
+                <th>{{ '枝番' }}</th>
+                <th>{{ '経典名' }}</th>
+                <th>{{ '収録巻次' }}</th>
+                <th>{{ '部門' }}</th>
+                <th>{{ '配本' }}</th>
+                <th>{{ '出版年月日' }}</th>
+
+                <th>{{ '底本/校本' }}</th>
+                <th>{{ '❹' }}</th>
+                <th>{{ '❼' }}</th>
+                <th>{{ '❼備考' }}</th>
+
+                <th>{{ '底本/校本' }}</th>
+                <th>{{ '新添部分' }}</th>
+                <th>{{ 'テキスト' }}</th>
+                <th>{{ '備考' }}</th>
+              </tr>
+              <tr
+                v-for="(obj, index) in results"
+                :key="index"
+                class="text-center"
+              >
+                <td width="5%">{{ obj['基-経典番号'] }}</td>
+                <td width="2%">{{ obj['基-枝番'] }}</td>
+                <td width="10%" class="pl-1 text-left">
+                  <a
+                    :href="
+                      'https://21dzk.l.u-tokyo.ac.jp/SAT2018/' +
+                      obj['sat_id'] +
+                      '.html'
+                    "
+                    target="_blank"
+                    >{{ obj['基-経典名'] }}</a
+                  >
+                </td>
+                <td width="2%">{{ obj['基-収録巻次'] }}</td>
+                <td width="5%" class="pl-1 text-left">{{ obj['基-部門'] }}</td>
+                <td width="2%">{{ obj['基-配本'] }}</td>
+                <td width="5%">{{ obj['基-年月日'].join(', ') }}</td>
+                <td
+                  width="5%"
+                  :bgcolor="
+                    obj['勘-底本/校本'] == '底本'
+                      ? '#BBDEFB'
+                      : obj['勘-底本/校本'] == '校本'
+                      ? '#FFCDD2'
+                      : ''
+                  "
+                >
+                  {{ obj['勘-底本/校本'] }}
+                </td>
+                <td width="10%" class="pl-1 text-left">{{ obj['勘-❹'] }}</td>
+                <td width="10%" class="pl-1 text-left">{{ obj['勘-❼'] }}</td>
+                <td width="10%" class="pl-1 text-left">
+                  {{ obj['勘-❼備考'] }}
+                </td>
+
+                <td
+                  width="5%"
+                  :bgcolor="
+                    obj['脚-底本/校本'] == '底本'
+                      ? '#BBDEFB'
+                      : obj['脚-底本/校本'] == '校本'
+                      ? '#FFCDD2'
+                      : ''
+                  "
+                >
+                  {{ obj['脚-底本/校本'] }}
+                </td>
+                <td width="5%" class="pl-1 text-left">
+                  {{ obj['脚-新添部分'] }}
+                </td>
+                <td width="10%" class="pl-1 text-left">
+                  <a
+                    :href="
+                      'http://www.kanzaki.com/works/2016/pub/image-annotator?u=https://d1av1vcgsldque.cloudfront.net/iiif/' +
+                      ('0000' + obj['No.']).slice(-4) +
+                      '/manifest.json'
+                    "
+                    target="_blank"
+                    >{{ obj['脚-テキスト'] }}</a
+                  >
+                </td>
+                <td width="10%" class="pl-1 text-left">{{ obj['脚-備考'] }}</td>
+
+                <td width="5%">
+                  <nuxt-link
+                    target="_blank"
+                    :to="
+                      localePath({
+                        name: 'item-id',
+                        params: {
+                          id: ('00000' + obj['No.']).slice(-5),
+                        },
+                      })
+                    "
+                    >{{ 'more' }}
+                  </nuxt-link>
+                </td>
+              </tr>
+            </table>
+
+            <div class="text-center">
+              <v-pagination
+                v-show="layout !== 'stats'"
+                v-model="currentPage"
+                :length="paginationLength"
+                :total-visible="7"
+                @input="setCurrentPage"
+              ></v-pagination>
+            </div>
+          </template>
         </v-col>
-        <v-col class="text-right">
-          <a>検索結果に関する統計情報を見る</a>
+
+        <v-col v-show="facetFlag" :sm="4" order-sm="1">
+          <template v-if="total > 0">
+            <h3 class="mb-5">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <i
+                    v-show="facetFlag"
+                    style="cursor: pointer;"
+                    class="far fa-caret-square-left mr-2"
+                    v-on="on"
+                    @click="facetFlag = !facetFlag"
+                  ></i>
+                </template>
+                <span>{{ $t('close_facets') }}</span>
+              </v-tooltip>
+              {{ $t('refine_your_search') }}
+            </h3>
+
+            <FacetSearchOptions />
+          </template>
         </v-col>
       </v-row>
-
-      <div class="text-center mb-5">
-        <v-pagination
-          v-model="currentPage"
-          :length="paginationLength"
-          :total-visible="7"
-          @input="setCurrentPage"
-        ></v-pagination>
-      </div>
-
-      <table
-        border="1"
-        style="border-collapse: collapse;"
-        width="100%"
-        class="my-2"
-      >
-        <tr>
-          <th colspan="7">
-            {{ '基本情報' }}
-          </th>
-          <th colspan="4">
-            {{ '勘同目録' }}
-          </th>
-          <th colspan="4">
-            {{ '脚注' }}
-          </th>
-          <th rowspan="2">詳細情報</th>
-        </tr>
-        <tr>
-          <th>{{ '経典番号' }}</th>
-          <th>{{ '枝番' }}</th>
-          <th>{{ '経典名' }}</th>
-          <th>{{ '収録巻次' }}</th>
-          <th>{{ '部門' }}</th>
-          <th>{{ '配本' }}</th>
-          <th>{{ '出版年月日' }}</th>
-
-          <th>{{ '底本/校本' }}</th>
-          <th>{{ '❹' }}</th>
-          <th>{{ '❼' }}</th>
-          <th>{{ '❼備考' }}</th>
-
-          <th>{{ '底本/校本' }}</th>
-          <th>{{ '新添部分' }}</th>
-          <th>{{ 'テキスト' }}</th>
-          <th>{{ '備考' }}</th>
-        </tr>
-        <tr
-          v-for="(obj, index) in displayResults"
-          :key="index"
-          class="text-center"
-        >
-          <td width="5%">{{ obj['基-経典番号'] }}</td>
-          <td width="2%">{{ obj['基-枝番'] }}</td>
-          <td width="10%" class="pl-1 text-left">
-            <a
-              :href="
-                'https://21dzk.l.u-tokyo.ac.jp/SAT2018/' +
-                obj['sat_id'] +
-                '.html'
-              "
-              target="_blank"
-              >{{ obj['基-経典名'] }}</a
-            >
-          </td>
-          <td width="2%">{{ obj['基-収録巻次'] }}</td>
-          <td width="5%" class="pl-1 text-left">{{ obj['基-部門'] }}</td>
-          <td width="2%">{{ obj['基-配本'] }}</td>
-          <td width="5%">{{ obj['基-年月日'].join(', ') }}</td>
-          <td
-            width="5%"
-            :bgcolor="
-              obj['勘-底本/校本'] == '底本'
-                ? '#BBDEFB'
-                : obj['勘-底本/校本'] == '校本'
-                ? '#FFCDD2'
-                : ''
-            "
-          >
-            {{ obj['勘-底本/校本'] }}
-          </td>
-          <td width="10%" class="pl-1 text-left">{{ obj['勘-❹'] }}</td>
-          <td width="10%" class="pl-1 text-left">{{ obj['勘-❼'] }}</td>
-          <td width="10%" class="pl-1 text-left">{{ obj['勘-❼備考'] }}</td>
-
-          <td
-            width="5%"
-            :bgcolor="
-              obj['脚-底本/校本'] == '底本'
-                ? '#BBDEFB'
-                : obj['脚-底本/校本'] == '校本'
-                ? '#FFCDD2'
-                : ''
-            "
-          >
-            {{ obj['脚-底本/校本'] }}
-          </td>
-          <td width="5%" class="pl-1 text-left">{{ obj['脚-新添部分'] }}</td>
-          <td width="10%" class="pl-1 text-left">
-            <a
-              :href="
-                'http://www.kanzaki.com/works/2016/pub/image-annotator?u=https://d1av1vcgsldque.cloudfront.net/iiif/' +
-                ('0000' + obj['No.']).slice(-4) +
-                '/manifest.json'
-              "
-              target="_blank"
-              >{{ obj['脚-テキスト'] }}</a
-            >
-          </td>
-          <td width="10%" class="pl-1 text-left">{{ obj['脚-備考'] }}</td>
-
-          <td width="5%">
-            <nuxt-link
-              target="_blank"
-              :to="
-                localePath({
-                  name: 'item-id',
-                  params: {
-                    id: ('00000' + obj['No.']).slice(-5),
-                  },
-                })
-              "
-              >{{ 'more' }}
-            </nuxt-link>
-          </td>
-        </tr>
-      </table>
-
-      <v-data-table
-        v-if="false"
-        :headers="headers"
-        :items="desserts"
-        :items-per-page="5"
-        multi-sort
-      >
-        <template v-slot:item.title="{ item }">
-          <a :href="satUrl(item)" target="blank">{{ item.title }}</a>
-        </template>
-
-        <template v-slot:item.kt="{ item }">
-          <v-chip :color="item.kt == '底本' ? 'error' : 'primary'" dark>{{
-            item.kt
-          }}</v-chip>
-        </template>
-
-        <template v-slot:item.ft="{ item }">
-          <v-chip :color="item.ft == '底本' ? 'error' : 'primary'" dark>{{
-            item.ft
-          }}</v-chip>
-        </template>
-
-        <template v-slot:item.no="{ item }">
-          <nuxt-link
-            :to="
-              localePath({
-                name: 'item-id',
-                params: {
-                  id: item.no,
-                },
-              })
-            "
-            >{{ 'more' }}
-          </nuxt-link>
-        </template>
-      </v-data-table>
-
-      <v-card v-if="false">
-        <v-card-title>
-          <v-spacer></v-spacer>
-          <!-- 
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            :label="$t('search')"
-            single-line
-            hide-details
-          ></v-text-field>
-          -->
-        </v-card-title>
-      </v-card>
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Watch, Component /*, Watch */ } from 'nuxt-property-decorator'
-// import axios from 'axios'
-
-// import searchResult from '~/components/ui/searchResult.vue'
-import CardItem from '~/components/display/CardItem.vue'
+import { Vue, Component } from 'nuxt-property-decorator'
+import SearchForm from '~/components/search/SearchForm.vue'
+import SearchFilter from '~/components/search/filter.vue'
+import FacetSearchOptions from '~/components/search/FacetSearchOptions.vue'
 
 @Component({
   components: {
-    // searchResult
-    CardItem,
+    SearchForm,
+    SearchFilter,
+    FacetSearchOptions,
   },
+  watchQuery: true,
 })
-export default class Volumes extends Vue {
-  search: string = ''
-  headers: any[] = [
-    {
-      text: '経典番号',
-      value: '基本情報-経典番号',
-      filterable: false,
-    },
-    { text: '枝番', value: '基本情報-枝番', filterable: false },
-    { text: '経典名', value: 'title', filterable: false },
-    { text: '収録巻次', value: '基本情報-収録巻次', filterable: false },
-    { text: '部門', value: '基本情報-部門', filterable: false },
-    { text: '配本', value: '基本情報-配本', filterable: false },
-    { text: '出版年月日', value: '基本情報-出版年月日', filterable: false },
-    { text: '底本/校本', value: 'kt', filterable: false },
-    { text: '④', value: '勘同目録-④', filterable: false },
-    { text: '⑦', value: '勘同目録-⑦', filterable: false },
-    { text: '⑦備考', value: '勘同目録-⑦備考', filterable: false },
-    { text: '底本/校本', value: 'ft', filterable: false },
-    { text: '新添部分', value: '脚注-新添', filterable: false },
-    { text: 'テキスト', value: '脚注-テキスト', filterable: false },
-    { text: '備考', value: '脚注-備考', filterable: false },
-    { text: '詳細情報', value: 'no' },
-  ]
+export default class search extends Vue {
+  loadingFlag: boolean = false
 
-  currentPage: number = 1
-  size: number = 50
+  // ソート項目
+  sortLabelsTmp: any = process.env.SORT_LABELS
+  itemsSort: string[] = JSON.parse(this.sortLabelsTmp)
 
-  get total() {
-    return this.searchResults.length
+  get results() {
+    return this.$store.state.result.hits.hits
   }
 
-  get paginationLength() {
-    return Math.ceil(this.total / this.size)
+  get currentPage() {
+    return this.$store.state.currentPage
   }
 
-  displayResults: any[] = []
-  searchResults: any[] = []
+  set currentPage(value) {
+    this.$store.commit('setCurrentPage', value)
+  }
 
-  async asyncData(context: any) {
-    const uri = process.env.BASE_URL + '/index.json'
-    const apiResult = await context.$axios
-      .get(uri)
-      .then((response: any) => {
-        const apiResult = response.data
-        return apiResult
-      })
-      .catch((error: any) => {
-        // eslint-disable-next-line
-        console.error(error)
-      })
+  get size() {
+    return this.$store.state.size
+  }
 
-    const from: number = context.query.from ? Number(context.query.from) : 0
+  set size(value) {
+    this.$store.commit('setSize', value)
+  }
 
-    const currentPage = Math.round(from / 50) + 1
+  get sort() {
+    return this.$store.state.sort
+  }
 
-    return {
-      currentPage,
-      searchResults: apiResult,
+  set sort(value) {
+    this.$store.commit('setSort', value)
+  }
+
+  get facetFlag() {
+    return this.$store.state.facetFlag
+  }
+
+  set facetFlag(value) {
+    this.$store.commit('setFacetFlag', value)
+  }
+
+  async fetch(context: any) {
+    const store = context.store
+    const state = store.state
+
+    if (state.index == null) {
+      const uri = process.env.BASE_URL + '/index.json'
+      const index = await context.app.$searchUtils.createIndexFromArray(uri)
+      store.commit('setIndex', index.index)
+      store.commit('setData', index.data)
     }
-  }
 
-  created() {
-    this.main()
-  }
-
-  main() {
-    const from: number = (this.currentPage - 1) * this.size
-
-    if (this.$route.query.size) {
-      this.size = Number(this.$route.query.size)
+    if (Object.keys(state.facetLabels)) {
+      // ファセット項目
+      const facetLabels: any = process.env.FACETS_LABELS
+      store.commit('setFacetLabels', JSON.parse(facetLabels))
+      const facetFlags: any = process.env.FACETS_FLAGS
+      store.commit('setFacetFlags', JSON.parse(facetFlags))
     }
-    this.displayResults = this.searchResults.slice(from, from + this.size)
-  }
 
-  @Watch('$route')
-  watchRoute() {
-    this.main()
+    const routeQuery = context.query
+
+    const esQuery = context.app.$searchUtils.createQuery(routeQuery, state)
+    store.commit('setQuery', esQuery)
+
+    const result = context.app.$searchUtils.search(
+      store.state.index,
+      store.state.data,
+      store.state.query
+    )
+
+    context.store.commit('setResult', result)
+
+    // --------
+
+    store.commit('init')
+
+    const keywords: any = routeQuery.keyword
+    if (keywords) {
+      store.commit('setKeyword', keywords)
+    }
+
+    for (const key in routeQuery) {
+      if (key.includes('fc-')) {
+        store.commit('setFc', {
+          label: key,
+          values: routeQuery[key],
+        })
+      }
+    }
+
+    const sort: any = routeQuery.sort
+    if (sort) {
+      store.commit('setSort', sort)
+    }
+
+    const from: any = routeQuery.from
+    if (from) {
+      store.commit('setFrom', Number(from))
+    }
+
+    const size: any = routeQuery.size
+    if (size) {
+      store.commit('setSize', Number(size))
+    }
+
+    const currentPage = state.from / state.size + 1
+    store.commit('setCurrentPage', currentPage)
+
+    const layout: any = routeQuery.layout
+    if (layout) {
+      store.commit('setLayout', layout)
+    }
+
+    const col: any = routeQuery.col
+    if (col) {
+      store.commit('setCol', Number(col))
+    }
+
+    if (process.browser) {
+      window.scrollTo(0, 0)
+    }
   }
 
   setCurrentPage() {
@@ -296,6 +382,20 @@ export default class Volumes extends Vue {
       query.from = (this.currentPage - 1) * this.size
       this.updateQuery(query)
     }
+  }
+
+  setSize() {
+    const query: any = Object.assign({}, this.$route.query)
+    query.from = 0
+    query.size = this.size
+    this.updateQuery(query)
+  }
+
+  setSort() {
+    const query: any = Object.assign({}, this.$route.query)
+    query.from = 0
+    query.sort = this.sort
+    this.updateQuery(query)
   }
 
   updateQuery(query: any) {
@@ -309,18 +409,44 @@ export default class Volumes extends Vue {
     )
   }
 
-  satUrl(data: any): string {
-    return (
-      'https://21dzk.l.u-tokyo.ac.jp/SAT2018/' +
-      data['基本情報-経典番号'] +
-      '_.' +
-      ('00' + data['SAT頭出し用']['開始巻']).slice(-2) +
-      '.' +
-      ('0000' + data['SAT頭出し用']['ページ']).slice(-4) +
-      data['SAT頭出し用']['段'] +
-      ('00' + data['SAT頭出し用']['行']).slice(-2) +
-      '.html'
-    )
+  get total(): number {
+    const result = this.$store.state.result
+    if (result.hits) {
+      return result.hits.total.value
+    } else {
+      return 0
+    }
+  }
+
+  get paginationLength() {
+    return Math.ceil(this.total / this.size)
+  }
+
+  get computedItemsSort() {
+    const arr: any[] = [
+      {
+        value: '_score:desc',
+        text: this.$t('relevance'),
+      },
+    ]
+
+    const orders = ['asc', 'desc']
+
+    const itemsSort = this.itemsSort
+
+    for (let i = 0; i < itemsSort.length; i++) {
+      const value = itemsSort[i]
+      for (let j = 0; j < orders.length; j++) {
+        const order = orders[j]
+        const label = value.startsWith('_') ? this.$t(value.slice(1)) : value
+        arr.push({
+          value: value + '.keyword:' + order,
+          text: label + ' ' + this.$t(order),
+        })
+      }
+    }
+
+    return arr
   }
 }
 </script>

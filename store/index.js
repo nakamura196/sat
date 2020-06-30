@@ -39,8 +39,8 @@ export const state = () => ({
 
   mode: '',
 
-  index: {}, // 転置インデックス
-  data: {}, // 全データ
+  index: null, // 転置インデックス
+  data: null, // 全データ
   query: {}, // クエリ
 })
 
@@ -191,5 +191,23 @@ export const mutations = {
     const array = state.image
     const newArray = array.filter((n) => !value.includes(n))
     state.image = newArray
+  },
+
+  // -------------
+
+  setResult4Print(state, value) {
+    state.result4print = value
+  },
+
+  setData(state, value) {
+    state.data = value
+  },
+
+  setIndex(state, value) {
+    state.index = value
+  },
+
+  setQuery(state, value) {
+    state.query = value
   },
 }

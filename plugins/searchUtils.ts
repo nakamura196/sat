@@ -1,4 +1,14 @@
 import axios from 'axios'
+
+function convert2arr(value: any): string[] {
+  let values: string[] = []
+  if (!Array.isArray(value)) {
+    values = [value]
+  } else {
+    values = value
+  }
+  return values
+}
 // /plugins/logger.ts
 export class SearchUtils {
   createQuery(routeQuery: any, config: any): any {
@@ -97,7 +107,6 @@ export class SearchUtils {
         }
       } else if (ops.keyword) {
         // or 検索
-        console.log('keywordOr')
       } else {
         const shouldPhase = []
 
@@ -157,8 +166,6 @@ export class SearchUtils {
           values = value
         }
 
-        console.log({ values })
-
         const pluses: string[] = []
         const minuses: string[] = []
 
@@ -170,8 +177,6 @@ export class SearchUtils {
             pluses.push(value)
           }
         }
-
-        console.log({ minuses, pluses })
 
         // minuses
         for (let j = 0; j < minuses.length; j++) {
@@ -354,7 +359,7 @@ export class SearchUtils {
       } else {
         results = this.handleCollections(collection.collections, hie + 1)
       }
-      // console.log({ results })
+
       for (let j = 0; j < results.length; j++) {
         const manifest = results[j]
         if (collection.label) {
@@ -431,6 +436,70 @@ export class SearchUtils {
         data.push(obj)
 
         pos += 1
+      }
+
+      return {
+        index,
+        data,
+      }
+    })
+
+    return data
+  }
+
+  async createIndexFromArray(uri: string): Promise<any> {
+    const data = await axios.get(uri).then((response) => {
+      const arr = response.data
+
+      const index: any = {}
+
+      const data = []
+
+      for (let i = 0; i < arr.length; i++) {
+        const obj = arr[i]
+
+        let fulltext = ''
+
+        for (const key in obj) {
+          if (!index[key]) {
+            index[key] = {}
+          }
+
+          const values = convert2arr(obj[key])
+
+          for (let j = 0; j < values.length; j++) {
+            let value = values[j]
+
+            // URIの場合は無視
+            if (value == null || String(value).startsWith('http')) {
+              continue
+            }
+
+            value = String(value)
+
+            if (!index[key][value]) {
+              index[key][value] = []
+            }
+
+            index[key][value].push(i)
+
+            fulltext += value + ' '
+          }
+        }
+
+        const key = '_full_text'
+
+        if (!index[key]) {
+          index[key] = {}
+        }
+
+        if (!index[key][fulltext]) {
+          index[key][fulltext] = []
+        }
+
+        index[key][fulltext].push(i)
+
+        data.push(obj)
       }
 
       return {
@@ -615,8 +684,6 @@ export class SearchUtils {
           }
         }
 
-        console.log({ type, typedObj, typedResult })
-
         if (type !== 'should') {
           mustIndexes = new Set(
             [...mustIndexes].filter((e) => typedResult.has(e))
@@ -631,8 +698,6 @@ export class SearchUtils {
     if (flags.should && !flags.must && !flags.filter && !flags.must_not) {
       mustIndexes = new Set([])
     }
-
-    console.log({ mustIndexes, shouldIndexes })
 
     const intersection = new Set([...mustIndexes, ...shouldIndexes])
 
