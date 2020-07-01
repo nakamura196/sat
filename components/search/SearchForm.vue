@@ -10,7 +10,7 @@
           rounded
           dense
           hide-details
-          :label="$t('search_works')"
+          :label="$t('キーワード検索')"
           clearable
           clear-icon="mdi-close-circle"
           append-icon="search"
